@@ -1,0 +1,14 @@
+# Build context / git
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Docs / IDE
+*.md
+.vscode/
+.idea/

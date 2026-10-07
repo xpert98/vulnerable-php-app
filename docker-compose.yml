@@ -1,0 +1,45 @@
+# No `version:` key on purpose: the modern Compose spec (v2 CLI) supports
+# `depends_on` with `condition: service_healthy`. Adding `version: 3.x`
+# would re-enable the old spec and reject that form.
+
+services:
+  app:
+    build: .
+    container_name: vulnapp
+    ports:
+      - "8080:80"
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: app
+      MYSQL_PASS: app_pass
+      MYSQL_DB: vulnapp
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: vulnapp-db
+    environment:
+      MYSQL_DATABASE: vulnapp
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app_pass
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - dbdata:/var/lib/mysql
+      # Auto-creates tables + seed data on first boot.
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "3306:3306"
+    # Root-over-socket ping is the most reliable liveness check
+    # (root@localhost always exists; ping needs no grants).
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+volumes:
+  dbdata:
