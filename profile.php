@@ -1,6 +1,7 @@
 <?php
 require_once 'includes/auth.php';
 require_login();
+require_once 'config/db.php';
 
 $user = current_user();
 $comment = '';
