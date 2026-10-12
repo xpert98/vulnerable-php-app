@@ -14,7 +14,7 @@ $db   = getenv('MYSQL_DB') ?: 'vulnapp';
 
 $pdo = null;
 $lastErr = '';
-for ($i = 0; $i < 30; $i++) {
+for ($i = 0; $i < 60; $i++) {
     try {
         $pdo = new PDO(
             "mysql:host={$host};charset=utf8mb4",
@@ -25,6 +25,7 @@ for ($i = 0; $i < 30; $i++) {
         break;
     } catch (PDOException $e) {
         $lastErr = $e->getMessage();
+        fwrite(STDOUT, "seed: waiting for MySQL ({$host})… attempt " . ($i + 1) . "/60\n");
         sleep(2);
     }
 }
@@ -92,3 +93,18 @@ foreach ($statements as $stmt) {
 }
 
 echo "seed: ok (ran {$ran} statements" . ($skipped ? ", skipped {$skipped} comment seeds" : "") . ")\n";
+
+// Self-check: fail loudly instead of serving an app with an empty DB.
+// (Without this, a silent skip would surface later as "Invalid credentials".)
+try {
+    $users = (int) $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+    $products = (int) $pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
+} catch (PDOException $e) {
+    fwrite(STDERR, "seed: verification query failed: " . $e->getMessage() . "\n");
+    exit(1);
+}
+if ($users === 0 || $products === 0) {
+    fwrite(STDERR, "seed: FAILED verification (users={$users}, products={$products}) — refusing to report success\n");
+    exit(1);
+}
+echo "seed: verified (users={$users}, products={$products})\n";

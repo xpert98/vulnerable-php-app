@@ -1,6 +1,5 @@
 -- Schema + seed for Tech Wire (vulnerable PHP testbed).
--- Local dev: auto-runs via docker-entrypoint-initdb.d mount.
--- Prebuilt deploys: executed idempotently by db/seed.php (one-shot container).
+-- Executed idempotently by db/seed.php (one-shot container).
 
 CREATE DATABASE IF NOT EXISTS vulnapp
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
