@@ -15,8 +15,10 @@ $comments = array();
 if (isset($_POST['comment'])) {
     $comment = trim((string) $_POST['comment']);
     if ($comment !== '') {
-        $u = mysql_real_escape_string($user);
-        $c = mysql_real_escape_string($comment);
+        // INTENTIONALLY VULNERABLE (testbed): interpolated raw so the wall
+        // INSERT is injectable. Do NOT add escaping here.
+        $u = $user;
+        $c = $comment;
         mysql_query("INSERT INTO comments (user, comment) VALUES ('$u', '$c')");
     }
 }
@@ -65,7 +67,7 @@ render_header('@' . $view_user, 'home');
         <span class="avatar"><?php echo htmlspecialchars(strtoupper(substr((string) $c['user'], 0, 1)), ENT_QUOTES); ?></span>
         <div class="post-main">
           <div class="post-meta"><strong><?php echo htmlspecialchars($c['user'], ENT_QUOTES); ?></strong><span><?php echo isset($c['created_at']) ? htmlspecialchars($c['created_at'], ENT_QUOTES) : ''; ?></span></div>
-          <p style="margin:6px 0 0"><?php echo htmlspecialchars($c['comment'], ENT_QUOTES); ?></p>
+          <p style="margin:6px 0 0"><?php echo $c['comment']; ?></p>
         </div>
       </article>
     <?php endforeach; ?>

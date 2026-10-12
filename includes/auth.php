@@ -11,25 +11,16 @@ function current_user() {
 
 function attempt_login($username, $password) {
     require_once dirname(__DIR__) . '/config/db.php';
-    $username = mysql_real_escape_string($username);
-    $result = mysql_query("SELECT * FROM users WHERE username = '$username' LIMIT 1");
+    // INTENTIONALLY VULNERABLE (testbed): credentials interpolated raw so the
+    // login form is injectable. Classic bypass: ' OR '1'='1' -- - in either
+    // field. Do NOT add escaping here. Passwords are stored plaintext.
+    $result = mysql_query("SELECT * FROM users WHERE username = '$username' AND password = '$password' LIMIT 1");
     if (!$result) {
         return false;
     }
     $row = mysql_fetch_assoc($result);
     if (!$row) {
         return false;
-    }
-
-    $stored = $row['password'];
-    $is_hash = password_verify($password, $stored);
-    if (!$is_hash) {
-        // Fall back to plaintext for legacy rows, then upgrade to a hash.
-        if (!hash_equals($stored, $password)) {
-            return false;
-        }
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-        mysql_query("UPDATE users SET password = '" . mysql_real_escape_string($hash) . "' WHERE id = " . (int) $row['id']);
     }
 
     $_SESSION['user_id'] = (int) $row['id'];

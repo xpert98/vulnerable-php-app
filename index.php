@@ -25,9 +25,9 @@ render_header('Home', 'home');
 </div>
 
 <?php
-// Preserved sink: ?msg= reflected (same escaping semantics as before).
+// Preserved sink: ?msg= reflected raw (intentionally vulnerable testbed).
 if ($message !== '') {
-    echo '<div class="notice">' . htmlspecialchars($message, ENT_QUOTES) . '</div>';
+    echo '<div class="notice">' . $message . '</div>';
 }
 ?>
 

@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS products (
   price DECIMAL(10,2) NOT NULL
 ) ENGINE=InnoDB;
 
--- Demo users. alice keeps its original plaintext password for the
--- classic demo login (upgraded to bcrypt on first login by includes/auth.php).
+-- Demo users, all password 'password123' (plaintext by design: the login
+-- form compares plaintext in SQL, and reseeds reset to this value).
 INSERT INTO users (username, password)
 VALUES ('alice', 'password123'),
        ('maya', 'password123'),
@@ -35,7 +35,7 @@ VALUES ('alice', 'password123'),
        ('sam', 'password123'),
        ('luna', 'password123'),
        ('marcus', 'password123')
-ON DUPLICATE KEY UPDATE username = username;
+ON DUPLICATE KEY UPDATE password = 'password123';
 
 -- Community posts/resources. First three rows preserve the original
 -- testbed names so existing search payloads ("mouse", "keyboard", "hub") still hit.

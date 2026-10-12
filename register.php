@@ -19,10 +19,10 @@ if (isset($_POST['register'])) {
     } elseif ($password !== $confirm) {
         $error = 'Passwords do not match';
     } else {
-        // Same testbed style: escaped + interpolated (intentionally vulnerable family).
+        // Testbed: passwords stored plaintext so the classic login comparison works.
+        // (Weak credential storage is itself one of the demo findings.)
         $u = mysql_real_escape_string($username);
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-        $h = mysql_real_escape_string($hash);
+        $h = mysql_real_escape_string($password);
         $ok = mysql_query("INSERT INTO users (username, password) VALUES ('$u', '$h')");
         if ($ok) {
             $res = mysql_query("SELECT * FROM users WHERE username = '$u' LIMIT 1");
