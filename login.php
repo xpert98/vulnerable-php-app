@@ -37,7 +37,6 @@ render_header('Log in');
       <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
       <p style="margin-top:16px"><button class="btn btn-primary" style="width:100%" type="submit" name="login" value="1">Log in</button></p>
     </form>
-    <p class="muted small">Demo account: <code>alice / password123</code></p>
     <p class="small">New to Tech Wire? <a href="register.php">Create an account</a> · <a href="about.php">What is this?</a></p>
   </div>
 </div>
