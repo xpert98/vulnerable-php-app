@@ -5,6 +5,10 @@
 services:
   app:
     build: .
+    # Tag the local build so the one-shot seeder (and prebuilt deploys)
+    # can reference the same artifact. Prebuilt deploys: set
+    # APP_IMAGE to the published tag and omit --build; no repo needed.
+    image: ${APP_IMAGE:-tech-wire:latest}
     container_name: vulnapp
     ports:
       - "8080:80"
@@ -16,7 +20,27 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      seed:
+        condition: service_completed_successfully
     restart: unless-stopped
+
+  # One-shot seeder — the ONLY seeding path (no host bind mounts, so
+  # prebuilt images work with no repo on the server). Runs db/seed.php
+  # from the app image, then exits. Safe to re-run: users/products are
+  # upserted, comments seed only into an empty table.
+  seed:
+    image: ${APP_IMAGE:-tech-wire:latest}
+    container_name: vulnapp-seed
+    command: ["php", "/var/www/html/db/seed.php"]
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: app
+      MYSQL_PASS: app_pass
+      MYSQL_DB: vulnapp
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
 
   db:
     image: mysql:8.0
@@ -28,8 +52,6 @@ services:
       MYSQL_ROOT_PASSWORD: root
     volumes:
       - dbdata:/var/lib/mysql
-      # Auto-creates tables + seed data on first boot.
-      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     ports:
       - "3306:3306"
     # Root-over-socket ping is the most reliable liveness check

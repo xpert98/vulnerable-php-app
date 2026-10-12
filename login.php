@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/auth.php';
+require_once 'includes/layout.php';
 
 if (is_logged_in()) {
     header('Location: profile.php');
@@ -21,22 +22,23 @@ if (isset($_POST['login'])) {
         $error = 'Invalid credentials';
     }
 }
+
+render_header('Log in');
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-</head>
-<body>
-<h1>Login</h1>
-<a href="index.php">Home</a>
-<hr>
-<?php if ($error) echo '<p style="color:red">' . htmlspecialchars($error, ENT_QUOTES) . '</p>'; ?>
-<p>Sign in with your username and password to continue.</p>
-<form method="POST" action="login.php">
-    <p>Username: <input type="text" name="username" required></p>
-    <p>Password: <input type="password" name="password" required></p>
-    <p><input type="submit" name="login" value="Login"></p>
-</form>
-</body>
-</html>
+<div class="auth-wrap">
+  <div class="card auth-card">
+    <h1 style="margin-top:0">Welcome back</h1>
+    <p class="muted auth-sub">Log in to reply, post, and browse the library.</p>
+    <?php if ($error) echo '<p class="error">' . htmlspecialchars($error, ENT_QUOTES) . '</p>'; ?>
+    <form method="POST" action="login.php" class="stack">
+      <label for="username">Username</label>
+      <input id="username" type="text" name="username" required autocomplete="username" placeholder="e.g. alice">
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+      <p style="margin-top:16px"><button class="btn btn-primary" style="width:100%" type="submit" name="login" value="1">Log in</button></p>
+    </form>
+    <p class="muted small">Demo account: <code>alice / password123</code></p>
+    <p class="small">New to Tech Wire? <a href="register.php">Create an account</a> · <a href="about.php">What is this?</a></p>
+  </div>
+</div>
+<?php render_footer(); ?>
