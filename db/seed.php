@@ -63,7 +63,7 @@ $skipped = 0;
 $ran = 0;
 foreach ($statements as $stmt) {
     $stmt = trim($stmt);
-    if ($stmt === '' || strpos($stmt, '--') === 0) {
+    if ($stmt === '') {
         continue;
     }
     // Skip comment seed on restarts to stay idempotent.
@@ -83,11 +83,14 @@ foreach ($statements as $stmt) {
     if ($stmt === '') {
         continue;
     }
+    // One line per statement so failures are attributable in `compose logs`.
+    $preview = preg_replace('/\s+/', ' ', substr($stmt, 0, 80));
     try {
         $pdo->exec($stmt);
         $ran++;
+        fwrite(STDOUT, "seed: [{$ran}] ok: {$preview}\n");
     } catch (PDOException $e) {
-        fwrite(STDERR, "seed: statement failed: " . $e->getMessage() . "\n");
+        fwrite(STDERR, "seed: [{$ran}] FAILED: {$preview} :: " . $e->getMessage() . "\n");
         exit(1);
     }
 }
